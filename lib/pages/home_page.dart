@@ -1,3 +1,4 @@
+import 'package:asuka/asuka.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,7 @@ class _HomePageState extends State<HomePage> {
             Positioned(
               right: 0,
               child: GestureDetector(
-                onTap: () async => homeController.showFilterModal(context: context),
+                onTap: () async => showFilterModal(context: context),
                 child: const Icon(
                   Icons.filter_alt_outlined,
                   size: 26,
@@ -229,6 +230,123 @@ class _HomePageState extends State<HomePage> {
               child: const Text('Registrar'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  Future<void> showFilterModal({required BuildContext context}) async {
+    final homeController = Provider.of<HomeController>(context, listen: false);
+
+    if (homeController.sales.isEmpty && !homeController.isFilterActive) {
+      AsukaSnackbar.message("Não há vendas registradas").show();
+
+      return;
+    }
+
+    await showModalBottomSheet(
+      enableDrag: false,
+      isDismissible: false,
+      context: context,
+      builder: (context) {
+        final homeController = Provider.of<HomeController>(context);
+
+        return Container(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Filtrar por data',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Icon(
+                        Icons.close,
+                        size: 26,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    homeController.isFilterActive
+                        ? 'De: ${homeController.selectedDateRange.start.day}/${homeController.selectedDateRange.start.month}/${homeController.selectedDateRange.start.year}'
+                        : 'De: ${homeController.baseSalesRange?.start.day}/${homeController.baseSalesRange?.start.month}/${homeController.baseSalesRange?.start.year}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    homeController.isFilterActive
+                        ? 'Até: ${homeController.selectedDateRange.end.day}/${homeController.selectedDateRange.end.month}/${homeController.selectedDateRange.end.year}'
+                        : 'Até: ${homeController.baseSalesRange?.end.day}/${homeController.baseSalesRange?.end.month}/${homeController.baseSalesRange?.end.year}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GestureDetector(
+                    onTap: () => homeController.onCloseModalFilter(context: context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Theme.of(context).colorScheme.primary),
+                      ),
+                      child: Text(
+                        'Limpar Filtro',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () async => await homeController.onFilterSaltes(context: context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Selecionar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
         );
       },
     );
