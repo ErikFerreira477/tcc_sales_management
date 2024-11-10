@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:sales_management/core/core.dart';
 import 'package:sales_management/core/db/db.dart';
 import 'package:uuid/uuid.dart';
@@ -114,9 +115,24 @@ class HomeController with ChangeNotifier {
 
   TextEditingController saleValue = TextEditingController();
 
-  TextEditingController saleObservation = TextEditingController();
-
   TextEditingController saleClientName = TextEditingController();
+
+  DateTime selectedDate = DateTime.now();
+
+  Future<void> onChangeSelecteDate({required BuildContext context}) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000, 1, 1),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      selectedDate = picked;
+    }
+
+    notifyListeners();
+  }
 
   Future<void> onAddSale({required BuildContext context}) async {
     changeIsLoadingModalAddSale();
@@ -126,8 +142,7 @@ class HomeController with ChangeNotifier {
         id: const Uuid().v4(),
         productName: saleTitle.text,
         price: double.parse(saleValue.text),
-        date: DateTime.now(),
-        observation: saleObservation.text,
+        date: selectedDate,
         clientName: saleClientName.text,
       );
 
@@ -158,8 +173,8 @@ class HomeController with ChangeNotifier {
   void disposeFields() {
     saleTitle.clear();
     saleValue.clear();
-    saleObservation.clear();
     saleClientName.clear();
+    selectedDate = DateTime.now();
     isAllFieldsFilled = false;
   }
 

@@ -187,12 +187,23 @@ class _HomePageState extends State<HomePage> {
                           controller: homeController.saleClientName,
                         ),
                         const SizedBox(height: 12),
-                        const Text('Observação'),
-                        TextField(
-                          controller: homeController.saleObservation,
-                          maxLines: 5,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
+                        const Text('Data'),
+                        const SizedBox(height: 6),
+                        GestureDetector(
+                          onTap: () async => await homeController.onChangeSelecteDate(context: context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Theme.of(context).colorScheme.primary),
+                            ),
+                            child: Text(
+                              homeController.selectedDate.formatNumericDayMonthYear(),
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                       ],
