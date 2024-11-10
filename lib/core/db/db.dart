@@ -4,6 +4,7 @@ import 'package:sales_management/core/core.dart';
 
 class IsarDB {
   IsarDB._privateConstructor();
+
   static final IsarDB _instance = IsarDB._privateConstructor();
   static IsarDB get instance => _instance;
 
@@ -43,5 +44,15 @@ class IsarDB {
     await isarInstance.writeTxn(() async {
       await isarInstance.saleModels.delete(saleModel.isarId);
     });
+  }
+
+  Future<List<SaleModel>> getAllSales() async {
+    List<SaleModel> sales = [];
+
+    await isarInstance.writeTxn(() async {
+      sales = await isarInstance.saleModels.where().findAll();
+    });
+
+    return await Future.value(sales);
   }
 }

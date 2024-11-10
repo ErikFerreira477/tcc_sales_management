@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sales_management/controllers/controller.dart';
+import 'package:sales_management/core/core.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,26 +14,112 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Central de Vendas',
+    final homeController = Provider.of<HomeController>(context);
+    TextStyle boldTitle = const TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 14,
+    );
+
+    return FutureBuilder(
+      future: homeController.handleHomePageData(),
+      builder: (context, s) {
+        if (homeController.isLoading) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
             ),
-          ],
-        ),
-      ),
-      body: const Column(
-        children: [],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async => await showModalRegisterSale(context),
-        tooltip: 'Registrar Venda',
-        child: const Icon(Icons.add),
-      ),
+          );
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Central de Vendas',
+                ),
+              ],
+            ),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        'Produto',
+                        style: boldTitle,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        'Data',
+                        style: boldTitle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'Valor',
+                        style: boldTitle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: homeController.sales.length,
+                    itemBuilder: (context, index) {
+                      final sale = homeController.sales[index];
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: Row(
+                          children: [
+                            Expanded(flex: 3, child: Text(sale.productName)),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                sale.date.formatNumericDayMonthYear(),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Text(
+                                  'R\$ ${sale.price.toStringAsFixed(2)}',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async => await showModalRegisterSale(context),
+            tooltip: 'Registrar Venda',
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
     );
   }
 
@@ -104,8 +191,9 @@ class _HomePageState extends State<HomePage> {
           ),
           actions: [
             TextButton(
-              onPressed:
-                  !homeController.isLoading ? () => homeController.onCloseModalRegisterSale(context: context) : null,
+              onPressed: !homeController.isLoadingModalAddSale
+                  ? () => homeController.onCloseModalRegisterSale(context: context)
+                  : null,
               style: ButtonStyle(
                 textStyle: WidgetStateProperty.all(
                   const TextStyle(
@@ -123,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              onPressed: !homeController.isLoading && homeController.isAllFieldsFilled
+              onPressed: !homeController.isLoadingModalAddSale && homeController.isAllFieldsFilled
                   ? () async => await homeController.onAddSale(context: context)
                   : null,
               child: const Text('Registrar'),

@@ -8,12 +8,35 @@ import 'package:uuid/uuid.dart';
 import 'package:asuka/asuka.dart';
 
 class HomeController with ChangeNotifier {
+  // General variables -------------------------------------------
+
   bool isLoading = false;
 
   void changeIsLoading() {
     isLoading = !isLoading;
     notifyListeners();
   }
+
+  bool isLoadingModalAddSale = false;
+
+  void changeIsLoadingModalAddSale() {
+    isLoadingModalAddSale = !isLoadingModalAddSale;
+    notifyListeners();
+  }
+
+  // Fill Screen Flow ---------------------------------------------
+
+  List<SaleModel> sales = [];
+
+  Future<void> handleHomePageData() async {
+    try {
+      sales = await IsarDB.instance.getAllSales();
+    } catch (e) {
+      AsukaSnackbar.alert("Erro ao carregar informações: $e").show();
+    }
+  }
+
+  // Register Sale Flow -------------------------------------------
 
   TextEditingController saleTitle = TextEditingController();
 
@@ -24,7 +47,7 @@ class HomeController with ChangeNotifier {
   TextEditingController saleClientName = TextEditingController();
 
   Future<void> onAddSale({required BuildContext context}) async {
-    changeIsLoading();
+    changeIsLoadingModalAddSale();
 
     try {
       SaleModel sale = SaleModel(
@@ -45,17 +68,17 @@ class HomeController with ChangeNotifier {
 
     disposeFields();
 
-    changeIsLoading();
+    changeIsLoadingModalAddSale();
 
     Navigator.of(context).pop();
   }
 
   void onCloseModalRegisterSale({required BuildContext context}) {
-    changeIsLoading();
+    changeIsLoadingModalAddSale();
 
     disposeFields();
 
-    changeIsLoading();
+    changeIsLoadingModalAddSale();
 
     Navigator.of(context).pop();
   }
