@@ -1,3 +1,4 @@
+import 'package:asuka/asuka.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sales_management/controllers/controller.dart';
@@ -23,9 +24,11 @@ class SalesManagementApp extends StatelessWidget {
           create: (context) => HomeController(),
         ),
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
+        builder: Asuka.builder,
         debugShowCheckedModeBanner: false,
-        home: HomePage(),
+        home: const HomePage(),
+        navigatorObservers: [Asuka.asukaHeroController],
       ),
     );
   }

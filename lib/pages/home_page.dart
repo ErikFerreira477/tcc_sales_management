@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sales_management/controllers/controller.dart';
 
@@ -19,7 +20,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Controle de Vendas',
+              'Central de Vendas',
             ),
           ],
         ),
@@ -36,54 +37,95 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> showModalRegisterSale(BuildContext context) async {
-    final homeController = Provider.of<HomeController>(context);
-
     return await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
+        final homeController = Provider.of<HomeController>(context);
+
         return AlertDialog(
           title: const Text('Registrar Venda'),
           content: Container(
             constraints: const BoxConstraints(maxWidth: 100),
             height: 412,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Título'),
-                  TextField(
-                    controller: homeController.saleTitle,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text('Valor'),
-                  TextField(
-                    controller: homeController.saleValue,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text('Nome do Cliente'),
-                  TextField(
-                    controller: homeController.saleClientName,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text('Observação'),
-                  TextField(
-                    controller: homeController.saleObservation,
-                    maxLines: 5,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
+            child: !homeController.isLoading
+                ? SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Título'),
+                        TextField(
+                          onChanged: (value) => homeController.handleIsAllFieldsFilled(),
+                          controller: homeController.saleTitle,
+                        ),
+                        const SizedBox(height: 12),
+                        const Text('Valor'),
+                        Stack(
+                          children: [
+                            const Positioned(
+                              top: 13,
+                              child: Text('R\$'),
+                            ),
+                            TextField(
+                              onChanged: (value) => homeController.handleIsAllFieldsFilled(),
+                              controller: homeController.saleValue,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                                LengthLimitingTextInputFormatter(8),
+                              ],
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.only(left: 24),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        const Text('Nome do Cliente'),
+                        TextField(
+                          onChanged: (value) => homeController.handleIsAllFieldsFilled(),
+                          controller: homeController.saleClientName,
+                        ),
+                        const SizedBox(height: 12),
+                        const Text('Observação'),
+                        TextField(
+                          controller: homeController.saleObservation,
+                          maxLines: 5,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ],
                     ),
+                  )
+                : const Center(
+                    child: CircularProgressIndicator(),
                   ),
-                ],
-              ),
-            ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed:
+                  !homeController.isLoading ? () => homeController.onCloseModalRegisterSale(context: context) : null,
+              style: ButtonStyle(
+                textStyle: WidgetStateProperty.all(
+                  const TextStyle(
+                    color: null,
+                  ),
+                ),
+              ),
               child: const Text('Cancelar'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              style: ButtonStyle(
+                textStyle: WidgetStateProperty.all(
+                  TextStyle(
+                    color: !homeController.isAllFieldsFilled ? Colors.grey : null,
+                  ),
+                ),
+              ),
+              onPressed: !homeController.isLoading && homeController.isAllFieldsFilled
+                  ? () async => await homeController.onAddSale(context: context)
+                  : null,
               child: const Text('Registrar'),
             ),
           ],
