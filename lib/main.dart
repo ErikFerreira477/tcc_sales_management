@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:sales_management/controllers/controller.dart';
 import 'package:sales_management/core/db/db.dart';
 import 'package:sales_management/pages/home_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,14 @@ class SalesManagementApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         home: const HomePage(),
         navigatorObservers: [Asuka.asukaHeroController],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        locale: const Locale('pt', 'BR'),
+        supportedLocales: const [
+          Locale('pt', 'BR'),
+        ],
       ),
     );
   }

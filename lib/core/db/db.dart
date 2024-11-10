@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sales_management/core/core.dart';
@@ -50,7 +51,24 @@ class IsarDB {
     List<SaleModel> sales = [];
 
     await isarInstance.writeTxn(() async {
-      sales = await isarInstance.saleModels.where().findAll();
+      sales = await isarInstance.saleModels.where().sortByDateDesc().findAll();
+    });
+
+    return await Future.value(sales);
+  }
+
+  ///getSalesByDateRange
+
+  Future<List<SaleModel>> getSalesByDateRange({required DateTimeRange dateRange}) async {
+    List<SaleModel> sales = [];
+
+    await isarInstance.writeTxn(() async {
+      sales = await isarInstance.saleModels
+          .where()
+          .filter()
+          .dateBetween(dateRange.start, dateRange.end)
+          .sortByDateDesc()
+          .findAll();
     });
 
     return await Future.value(sales);

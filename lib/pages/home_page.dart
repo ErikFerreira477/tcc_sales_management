@@ -20,106 +20,118 @@ class _HomePageState extends State<HomePage> {
       fontSize: 14,
     );
 
-    return FutureBuilder(
-      future: homeController.handleHomePageData(),
-      builder: (context, s) {
-        if (homeController.isLoading) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: const Row(
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 45,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Stack(
+          children: [
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Central de Vendas',
-                ),
+                Text('Central de Vendas'),
               ],
             ),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        'Produto',
-                        style: boldTitle,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'Data',
-                        style: boldTitle,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        'Valor',
-                        style: boldTitle,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+            Positioned(
+              right: 0,
+              child: GestureDetector(
+                onTap: () async => homeController.showFilterModal(context: context),
+                child: const Icon(
+                  Icons.filter_alt_outlined,
+                  size: 26,
                 ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: homeController.sales.length,
-                    itemBuilder: (context, index) {
-                      final sale = homeController.sales[index];
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: FutureBuilder(
+          future: !homeController.isFilterActive
+              ? homeController.handleHomePageData()
+              : homeController.handleHomePageDataFiltered(),
+          builder: (context, s) {
+            if (homeController.isLoading || s.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: Row(
-                          children: [
-                            Expanded(flex: 3, child: Text(sale.productName)),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                sale.date.formatNumericDayMonthYear(),
-                                textAlign: TextAlign.center,
+            return Padding(
+              padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          'Produto',
+                          style: boldTitle,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Data',
+                          style: boldTitle,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Valor',
+                          style: boldTitle,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: homeController.sales.length,
+                      itemBuilder: (context, index) {
+                        final sale = homeController.sales[index];
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: Row(
+                            children: [
+                              Expanded(flex: 3, child: Text(sale.productName)),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  sale.date.formatNumericDayMonthYear(),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
+                              Expanded(
+                                flex: 2,
                                 child: Text(
                                   'R\$ ${sale.price.toStringAsFixed(2)}',
                                   textAlign: TextAlign.center,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () async => await showModalRegisterSale(context),
-            tooltip: 'Registrar Venda',
-            child: const Icon(Icons.add),
-          ),
-        );
-      },
+                  const SizedBox(height: 82),
+                ],
+              ),
+            );
+          }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async => await showModalRegisterSale(context),
+        tooltip: 'Registrar Venda',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
